@@ -30,7 +30,19 @@ if not set -q NO_FISHMARKS_COMPAT_ALIASES
     alias p print_bookmark
     alias d delete_bookmark
     alias l list_bookmarks
+    alias fa flushall
+    alias da flushall
+    alias sa save_anything
+    alias lf list_with_fzf
+    alias gg list_with_fzf
+    alias lll list_with_fzf
+    alias llll list_with_fzf
+    alias lc list_and_copy_with_fzf
+    alias lfc list_and_copy_with_fzf
+    alias dz del_with_fzf
 end
+
+
 
 function save_bookmark --description "Save the current directory as a bookmark"
     set -l bn $argv[1]
@@ -97,12 +109,25 @@ function delete_bookmark --description "Delete a bookmark"
     end
 end
 
+
+
+
+
+
 function list_bookmarks --description "List all available bookmarks"
+    set with_fzf $argv[1]
     if not _check_help $argv[1];
         cat $SDIRS | grep "^export DIR_" | sed "s/^export /set -x /" | sed "s/=/ /" | .
-        env | sort | awk '/DIR_.+/{split(substr($0,5),parts,"="); printf("\033[0;33m%-20s\033[0m %s\n", parts[1], parts[2]);}'
+        if test -n "$with_fzf"
+            env | sort | awk '/DIR_.+/{split(substr($0,5),parts,"="); printf("%-20s %s\n", parts[1], parts[2]);}'
+            return 0
+        else 
+            env | sort | awk '/DIR_.+/{split(substr($0,5),parts,"="); printf("\033[0;33m%-20s\033[0m %s\n", parts[1], parts[2]);}'
+            return 0
+        end
     end
 end
+
 
 function _check_help
     if [ (count $argv) -lt 1 ]
@@ -134,6 +159,87 @@ function _valid_bookmark
         end
     end
 end
+
+
+function save_anything
+    set bn $argv[1]
+    
+    if test -z $argv[1]
+        s
+        return
+    end
+    
+    if [ -n "$argv[2]" ]
+        echo "export DIR_$bn=\"$argv[2..-1] \"" >> $SDIRS
+        return
+    end    
+
+    
+    set cmd (echo $history[1])
+    if test -n $cmd
+        echo "export DIR_$bn=\"$cmd\"" >> $SDIRS
+    else
+        echo "empty history!"
+    end
+end
+
+function list_with_fzf
+    set need_copy $argv[1]
+    set data (l "with_fzf" | fzf)
+    if [ ! -n "$data" ]
+        return
+    end
+    
+    set bn  (echo $data |  awk '{print $1}')
+    set second_key  (echo $data |  awk '{print $2}')
+    set target (echo $data | awk '{for (i=2; i<=NF; i++) print $i}')
+
+    # to string
+    set target "$target"
+
+    if test -n $target
+        if test -n $need_copy
+            copy_to_clipboard $target
+        end
+
+        if [ -d "$target" ]
+            go_to_bookmark $bn
+            return
+        end
+
+        # program ?
+        if type -q $second_key
+            eval $target
+            return
+        end
+        # text
+        echo $target
+    end
+end
+
+
+function copy_to_clipboard
+    echo -n $argv[1] | xclip -sel clip
+end
+
+
+function flushall
+    true > $SDIRS
+end
+
+function del_with_fzf
+    set data (l "with_fzf" | fzf)
+    if [ ! -n "$data" ] 
+        return
+    end
+    set bn  (echo $data |  awk '{print $1}')
+    delete_bookmark $bn
+end
+
+function list_and_copy_with_fzf
+    list_with_fzf "copy"
+end
+
 
 function _update_completions
     cat $SDIRS | grep "^export DIR_" | sed "s/^export /set -x /" | sed "s/=/ /" | .
