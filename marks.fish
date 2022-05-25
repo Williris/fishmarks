@@ -222,9 +222,17 @@ function copy_to_clipboard
     echo -n $argv[1] | xclip -sel clip
 end
 
-
 function flushall
-    true > $SDIRS
+    while true
+        read -l -P 'Do you want to delate all bookmarks? [y/N] ' confirm
+        switch $confirm
+                case Y y
+                    true > $SDIRS
+                    return 0
+                case '' N n
+                    return 1
+        end
+    end
 end
 
 function del_with_fzf
