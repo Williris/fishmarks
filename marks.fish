@@ -187,23 +187,27 @@ end
 
 function list_with_fzf
     set need_copy $argv[1]
+    if test -n $need_copy
+        copy_to_clipboard $target
+    end
+
+
     set data (l "with_fzf" | fzf)
     if [ ! -n "$data" ]
         return
     end
-    
+    where_go $data
+end
+
+
+function where_go
+    set data $argv[1]
     set bn  (echo $data |  awk '{print $1}')
     set second_key  (echo $data |  awk '{print $2}')
     set target (echo $data | awk '{for (i=2; i<=NF; i++) print $i}')
 
-    # to string
-    set target "$target"
-
+    set target $argv[1]
     if test -n $target
-        if test -n $need_copy
-            copy_to_clipboard $target
-        end
-
         if [ -d "$target" ]
             go_to_bookmark $bn
             return
