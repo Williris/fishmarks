@@ -206,7 +206,9 @@ function where_go
     set second_key  (echo $data |  awk '{print $2}')
     set target (echo $data | awk '{for (i=2; i<=NF; i++) print $i}')
 
-    set target $argv[1]
+
+    set target "$target"
+
     if test -n $target
         if [ -d "$target" ]
             go_to_bookmark $bn
@@ -215,6 +217,7 @@ function where_go
 
         # program ?
         if type -q $second_key
+            echo "========tg";
             eval $target
             return
         end
