@@ -217,7 +217,6 @@ function where_go
 
         # program ?
         if type -q $second_key
-            echo "========tg";
             eval $target
             return
         end
