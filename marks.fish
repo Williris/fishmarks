@@ -40,6 +40,7 @@ if not set -q NO_FISHMARKS_COMPAT_ALIASES
     alias lc list_and_copy_with_fzf
     alias lfc list_and_copy_with_fzf
     alias dz del_with_fzf
+    alias edi edit
 end
 
 
@@ -170,7 +171,7 @@ function save_anything
     end
     
     if [ -n "$argv[2]" ]
-        echo "export DIR_$bn=\"$argv[2..-1] \"" >> $SDIRS
+        echo "export DIR_$bn=\"$argv[2..-1]\"" >> $SDIRS
         return
     end    
 
@@ -247,6 +248,22 @@ end
 function list_and_copy_with_fzf
     list_with_fzf "copy"
 end
+
+function edit
+    set seleted (list_bookmarks "with_fzf" | fzf)
+    set bn  (echo $seleted |  awk '{print $1}')
+    set target (echo $seleted | awk '{for (i=2; i<=NF; i++) print $i}')
+    # to string
+    set target "$target"
+
+    read -c $target -x changed_content -P "$bn >>  "
+    if test -n $changed_content
+        set changed_content2 (string trim $changed_content)
+        save_anything $bn $changed_content2
+    end
+end
+
+
 
 
 function _update_completions
