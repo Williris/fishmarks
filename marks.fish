@@ -171,13 +171,14 @@ function save_anything
     end
     
     if [ -n "$argv[2]" ]
+        reset_bm $bn
         echo "export DIR_$bn=\"$argv[2..-1]\"" >> $SDIRS
         return
     end    
 
-    
     set cmd (echo $history[1])
     if test -n $cmd
+        reset_bm $bn
         echo "export DIR_$bn=\"$cmd\"" >> $SDIRS
     else
         echo "empty history!"
@@ -264,7 +265,12 @@ function edit
 end
 
 
-
+function reset_bm
+    set bn $argv[1]
+    if _valid_bookmark $bn
+        sed -i='' "/DIR_$bn=/d" $SDIRS
+    end
+end
 
 function _update_completions
     cat $SDIRS | grep "^export DIR_" | sed "s/^export /set -x /" | sed "s/=/ /" | .
