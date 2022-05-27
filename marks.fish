@@ -152,6 +152,12 @@ function _valid_bookmark
         return 1
     else
         cat $SDIRS | grep "^export DIR_" | sed "s/^export /set -x /" | sed "s/=/ /" | .
+
+        set bn_start_with_underscore (echo $bn | awk -F "_" '{print $2}')
+        if test -n bn_start_with_underscore
+            return 0
+        end
+
         set -l bookmark (env | grep "^DIR_$argv[1]=" | cut -f1 -d "=" | cut -f2 -d "_" )
         if begin; not [ -n "$bookmark" ]; or not [ $bookmark=$argv[1] ]; end
             return 1
