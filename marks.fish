@@ -77,6 +77,7 @@ function go_to_bookmark --description "Go to (cd) to the directory associated wi
         end
         if [ -d "$target" ]
             cd "$target"
+            commandline -f repaint
             return 0
         else
             echo -e "\033[0;31mERROR: '$target' does not exist\033[00m"
@@ -224,10 +225,13 @@ function where_go
         # program ?
         if type -q $second_key
             eval $target
+            commandline -f repaint
             return
         end
         # text
         echo $target
+        commandline -f repaint
+
     end
 end
 
