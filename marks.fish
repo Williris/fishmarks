@@ -201,6 +201,7 @@ function list_with_fzf
 
     set data (l "with_fzf" | fzf)
     if [ ! -n "$data" ]
+        commandline -f repaint
         return
     end
     where_go $data
@@ -294,6 +295,8 @@ function _update_completions
     complete -c print_bookmark -a $_marks -f
     complete -c delete_bookmark -a $_marks -f
     complete -c go_to_bookmark -a $_marks -f
+    complete -c ff -w z -f
+
     if not set -q NO_FISHMARKS_COMPAT_ALIASES
         complete -c p -a $_marks -f
         complete -c d -a $_marks -f
